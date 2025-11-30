@@ -10,18 +10,19 @@ This backend provides authentication, profile management, authorization, and dat
 
 ## 📌 Table of Contents
 
-- Project Goals
-- Tech Stack
-- Architecture Decisions
-- API Features
-- Setup Instructions
-- Environment Configuration
-- Running the Server
-- API Endpoints
-- Database Details
-- Frontend Link
-- Time Spent
-- Limitations
+- [Project Goals](#project-goals)
+- [Tech Stack](#tech-stack)
+- [Architecture Decisions](#architecture-decisions)
+- [API Features](#api-features)
+- [Setup Instructions](#setup-instructions)
+- [Environment Configuration](#environment-configuration)
+- [Running the Server](#running-the-server)
+- [API Endpoints](#api-endpoints)
+- [Database Details](#database-details)
+- [Frontend Link](#frontend-link)
+- [Time Spent](#time-spent)
+- [Limitations](#limitations)
+- [Summary](#summary)
 
 ---------------------------------------------------------------------
 
@@ -56,7 +57,7 @@ This backend fulfills the required assignment expectations:
 
 - **JWT Token Authentication** chosen for mobile and web session handling.
 - **SQLite Database** used for simplicity and local development.
-- **Password Hashing** implemented using bcrypt for security.
+- **Password Hashing** implemented using bcrypt for security through Passlib hashing.
 - **Token validation** applied on protected endpoints to prevent unauthorized access.
 - **CORS Middleware** added to allow communication from mobile clients, local browser, or Expo app.
 
@@ -66,10 +67,9 @@ This backend fulfills the required assignment expectations:
 
 - [x] User Registration (POST `/auth/signup`)
 - [x] User Login with JWT return (POST `/auth/login`)
-- [x] Token-protected routes
 - [x] Retrieve authenticated user profile (GET `/profile/me`)
-- [x] Update name/bio (PUT `/profile/me`)
-- [x] Validation + structured error messaging
+- [x] Update name and bio (PUT `/profile/me`)
+- [x] Validation, structured error messaging
 
 ---------------------------------------------------------------------
 
@@ -80,100 +80,129 @@ This backend fulfills the required assignment expectations:
 ```bash
 git clone https://github.com/sejalsharma2002/profile-management-backend.git
 cd profile-management-backend
+```
 2. Create Virtual Environment
-bash
-Copy code
+```bash
 python -m venv venv
+```
 Windows:
-bash
-Copy code
+```bash
 venv\Scripts\activate
-Mac/Linux:
-bash
-Copy code
-source venv/bin/activate
+```
 3. Install Dependencies
-bash
-Copy code
+```bash
 pip install -r requirements.txt
-Environment Configuration
-Optional .env file values (defaults exist if file is missing):
+```
 
-bash
-Copy code
+---
+## Environment Configuration
+Optional .env file values (defaults exist if file is missing):
+```bash
 SECRET_KEY="your-secret"
 ALGORITHM="HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES=180
-Running the Server
-For Desktop / Browser Testing
-bash
-Copy code
+```
+
+---
+## Running the Server
+### For Desktop / Browser Testing
+```bash
 uvicorn main:app --reload
-For Mobile App Support (Expo / Physical Device)
-bash
-Copy code
+```
+### For Mobile App Support (Expo / Physical Device)
+```bash
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 Ensure your machine firewall allows access if using mobile.
 
-API Endpoints
-Method	Endpoint	Auth	Purpose
-POST	/auth/signup	❌	Register new user
-POST	/auth/login	❌	Authenticate user + return JWT token
-GET	/profile/me	✔️	Get authenticated user's profile
-PUT	/profile/me	✔️	Update authenticated user's name + bio
+---
+### API Endpoints
+
+| Method | Endpoint       | Purpose                                   |
+|--------|---------------|--------------------------------------------|
+| POST   | /auth/signup  | Register new user                          |
+| POST   | /auth/login   | Authenticate user and return JWT token     |
+| GET    | /profile/me   | Fetch authenticated user's profile         |
+| PUT    | /profile/me   | Update authenticated user's name and bio   |
 
 Swagger documentation is available at:
 
-bash
-Copy code
+```bash
 http://127.0.0.1:8000/docs
-Database Details
-Engine: SQLite (generated automatically as database.db)
+```
+---
+## Database Details
+### Engine: SQLite (generated automatically as database.db)
 
-Table(s):
+### Table(s):
 
-users (id, name, email, password hash, bio)
+- users (id, name, email, password hash, bio)
 
-Auto-increment ID enabled (respects deleted rows)
+### Auto-increment ID enabled (respects deleted rows)
 
-No manual setup required — database initializes on first run.
+> No manual setup required — database initializes on first run.
 
-Frontend Link
+---
+## Frontend Link
 The frontend application that consumes this API is available here:
-
-bash
-Copy code
 https://github.com/sejalsharma2002/profile-management-frontend
-Time Spent (Estimated)
-Task	Duration
-Initial setup + dependencies	1 hr
-Authentication + JWT implementation	3 hrs
-Profile CRUD development	2 hrs
-Testing backend with mobile + web	3 hrs
-Debugging + refinement	2 hrs
-Final documentation	1 hr
 
-Total Estimated Time: 12 hours
+---
+## Time Spent
+| Task                                   | Duration |
+|----------------------------------------|----------|
+| Initial setup + dependencies           | 4 hr     |
+| Authentication + JWT implementation    | 3 hrs    |
+| Profile CRUD development               | 2 hrs    |
+| Testing backend with mobile + web      | 3 hrs    |
+| Debugging + refinement                 | 3 hrs    |
+| Final documentation                    | 3 hr     |
 
-Limitations
-Based on project scope and assignment requirements:
+Total Estimated Time: **18 hours**
 
-NativeWind/Tailwind not required in backend, so no styling engine involved.
+---
+## Limitations
 
-No user roles or admin-level permissions (single user type).
+This backend implements the core requirements of Task #1 from the assignment
+(secure signup, login with JWT, and protected profile read/update), but a few
+points from the original specification are either simplified or not included.
 
-No public deployment URL — backend runs locally only.
+### 1. Database Migrations (Alembic)
 
-No password reset / email verification workflow.
+- The assignment recommends using a migration tool like **Alembic** for schema
+  versioning and evolution.
+- In this implementation, the MySQL schema is created directly using
+  SQLAlchemy’s `Base.metadata.create_all()`.
+- There are **no versioned Alembic migration scripts**, so database changes
+  would currently need to be applied manually or by recreating the schema.
 
-Only JSON-based profile fields (no avatar upload support yet).
+### 2. Password Strength Validation
 
-These items do not affect assignment correctness and are available for version upgrades.
+- The spec asks for server-side validation of both **email format** and
+  **password strength**.
+- Email format is validated via Pydantic schemas, and passwords are securely
+  hashed before storage.
+- However, password-strength checks are **minimal** (e.g., basic length checks)
+  and do not enforce advanced rules such as:
+  - required mix of uppercase/lowercase/digits/special characters
+  - checking against common / compromised passwords
+  - progressive strength scoring
 
-Summary
+---
+
+These limitations do **not impact the core Task #1 flow**:
+
+- secure registration with hashed password
+- JWT-based authentication
+- protected access to `/profile/me` for reading and updating profile data
+
+---
+## Summary
 ✔ Secure
 ✔ Functional
 ✔ Mobile + Web compatible
 ✔ Meets assignment expectations
 
 Backend successfully supports the full authentication and profile flow for the Profile Management System frontend.
+
+---
